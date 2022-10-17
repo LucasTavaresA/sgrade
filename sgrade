@@ -1,0 +1,225 @@
+#!/usr/bin/env sh
+#
+# sgrade - Simple alternative to topgrade.
+status () {
+    status="$status$1 $2!  $3\n"
+}
+
+heading () {
+    echo
+    cols=$(tput cols)
+    center=$((cols/2))
+    header="$1"
+    headersize="${#header}"
+    indent=$((center-(headersize/2)))
+    meio=0
+
+    i=0
+    while [ $i -lt $cols ]; do
+        if [ $i -lt $indent ]; then
+            col="${col}─"
+        elif [ $i -gt $((indent+2+headersize)) ]; then
+            col="${col}─"
+        elif [ $meio = 0 ]; then
+            col="${col} $header "
+            meio=1
+        fi
+
+        i=$((i+1))
+    done
+
+    echo "$col"
+    col=""
+    echo
+}
+
+# This is just a simple wrapper around 'command -v' to avoid
+# spamming '>/dev/null' throughout this function. This also guards
+# against aliases and functions.
+has () {
+    _cmd=$(command -v "$1") 2>/dev/null || return 1
+    [ -x "$_cmd" ] || return 1
+}
+
+as_su () {
+    eval su root -c \'"$*"\'
+}
+
+update_packages () {
+    heading PACKAGES
+    if has paru; then
+        paru -Pw
+        paru --color always -Syu && status packages OK || status packages XX
+    elif has yay; then
+        yay -Pw
+        yay --color always -Syu && status packages OK || status packages XX
+    elif has pacman; then
+        $SU pacman --color always -Syu && status packages OK || status packages XX
+    elif has xbps-install; then
+        $SU xbps-install -Su && status packages OK || status packages XX
+    elif has apt; then
+        $SU apt update && $SU apt dist-upgrade && status packages OK || status packages XX
+    elif has dnf; then
+        $SU dnf upgrade && status packages OK || status packages XX
+    elif has yum; then
+        $SU yum upgrade && status packages OK || status packages XX
+    elif has swupd; then
+        $SU swupd update && status packages OK || status packages XX
+    elif has zypper; then
+        $SU zypper refresh && $SU zypper dist-upgrade && status packages OK || status packages XX
+    elif has pkg; then
+        $SU pkg upgrade && status packages OK || status packages XX
+        $SU pkg audit -Fr
+    fi
+    if has freebsd-update; then
+        heading FreeBSD
+        $SU freebsd-update fetch install && status freebsd OK || status freebsd XX
+    fi
+}
+
+update_etc () {
+    if has pacdiff; then
+        heading ETC
+        $SU pacdiff && status etc OK || status etc XX
+    fi
+}
+
+update_nodejs () {
+    if has node; then
+        if has yarn; then
+            heading YARN
+            yarn global update && status nodejs OK || status nodejs XX
+        elif has npm; then
+            heading NPM
+            if npm root --location=global | grep $HOME; then
+                npm update --location=global && status nodejs OK || status nodejs XX
+            fi
+        else
+            status nodejs XX "Install yarn or npm!"
+        fi
+    fi
+}
+
+update_pip () {
+    if has pip; then
+        heading PIP
+        pip install $(pip freeze | sed 's/==/>=/;/.*@.*$/d') --upgrade && status pip OK || status pip XX
+    fi
+}
+
+update_dotnet () {
+    if has dotnet; then
+        heading DOTNET
+        dotnet tool update $(dotnet tool list --global | sed '1,2d;s/ .*//') --global
+    fi
+}
+
+update_fish () {
+    if has fish; then
+        heading FISH
+        fish -c "fisher update" && status fish OK || status fish XX
+    fi
+}
+
+update_rustup () {
+    if has rustup; then
+        heading RUSTUP
+        rustup update && status rustup OK || status rustup XX
+        rustup self-update
+    fi
+}
+
+update_cargo () {
+    if has cargo; then
+        heading CARGO
+        if has cargo-install-update; then
+            cargo install-update -a 2> /dev/null && status cargo OK || status cargo XX
+        else
+            status cargo XX "Install cargo-update!"
+        fi
+    fi
+}
+
+update_flatpak () {
+    if has flatpak; then
+        heading FLATPAK
+        flatpak update && status flatpak OK || status flatpak XX
+    fi
+}
+
+update_snap () {
+    if has snap; then
+        heading SNAP
+        $SU snap refresh && status snap OK || status snap XX
+    fi
+}
+
+update_brew () {
+    if has brew; then
+        heading BREW
+        brew update && brew upgrade && status brew OK || status brew XX
+    fi
+}
+
+update_nix () {
+    if has nix; then
+        heading NIX
+        nix upgrade-nix && nix --upgrade && status nix OK || status nix XX
+    fi
+}
+
+update_pearl () {
+    if has pearl; then
+        heading PEARL
+        pearl update && status pearl OK || status pearl XX
+    fi
+}
+
+update_gem () {
+    if has gem; then
+        heading GEM
+        if [ -d "$HOME/.gem" ]; then
+            gem upgrade --user-install && status gem OK || status gem XX
+        else
+            gem upgrade && status gem OK || status gem XX
+        fi
+    fi
+}
+
+update_custom () {
+    if has custom; then
+        heading CUSTOM
+        ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom
+    fi
+}
+
+main() {
+    if has doas; then
+        SU=doas
+    elif has sudo; then
+        SU=sudo
+    else
+        SU=as_su
+    fi
+
+    status=""
+    # Allow the user to specify the order and inclusion of information
+    # functions through the 'SG_RESOURCES' environment variable.
+    # shellcheck disable=2086
+    {
+        # Disable globbing and set the positional parameters to the
+        # contents of 'SG_RESOURCES'.
+        set -f
+        set +f -- ${SG_RESOURCES-packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem custom}
+
+        # Iterate over the above list and run any existing "update_" functions.
+        for resource do
+            "update_$resource"
+        done
+    }
+
+    heading RESULTS
+    echo "$status"
+}
+
+main "$@"
