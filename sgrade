@@ -234,9 +234,9 @@ update_gem () {
 }
 
 update_custom () {
-    if has custom; then
+    if [ -e ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom ]; then
         heading CUSTOM
-        ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom
+        ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom && status custom OK || status custom XX
     fi
 }
 
