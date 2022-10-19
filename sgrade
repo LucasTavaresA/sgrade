@@ -72,11 +72,11 @@ or copy sgrade to /usr/local/bin !\nNew sgrade version, do you want to update [y
                                 echo "You have to re-execute after updates!"
                                 exit
                             else
-                                status update-sgrade XX "You refused to update sgrade!"
+                                status sgrade XX "You refused to update sgrade!"
                             fi
         fi
     else
-        status update-sgrade XX "You need git to update sgrade automatically!"
+        status sgrade XX "You need git to update sgrade automatically!"
     fi
 }
 
@@ -113,7 +113,7 @@ update_packages () {
 
 update_freebsd () {
     if has freebsd-update; then
-        heading FreeBSD
+        heading FREEBSD
         $SU freebsd-update fetch install && status freebsd OK || status freebsd XX
     fi
 }
