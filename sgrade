@@ -57,32 +57,43 @@ as_su () {
 update_sgrade () {
     heading SGRADE
     if has git; then
-        current_path=$(pwd)
         [ -z "$SG_PATH" ] && SG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/sgrade"
         if [ ! -d "$SG_PATH" ]; then
             git clone https://github.com/lucastavaresa/sgrade $SG_PATH
-        else
-            cd $SG_PATH && git pull --rebase && cd $current_path
         fi
 
-        if has sgrade; then
-            sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
-        else
-            sg_bin="/usr/local/bin/sgrade"
-        fi
-        sg_new_bin="$SG_PATH/sgrade"
+        updated=0
+        current_path=$(pwd)
 
-        if [ ! -z "$(diff -qN $sg_new_bin $sg_bin)" ]; then
-            printf "This will substitute sgrade in your path with the new one, \
-or copy sgrade to /usr/local/bin !\nNew sgrade version, do you want to update [y/N]? "
-                            read answer
-                            if [ "$answer" != "${answer#[Yy]}" ]; then
-                                $SU cp $sg_new_bin $sg_bin
-                                echo "You have to re-execute after updates!"
-                                exit
-                            else
-                                status sgrade XX "You refused to update sgrade!"
-                            fi
+        cd $SG_PATH && git fetch && [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ] \
+            && git pull --rebase && updated=1
+
+        cd $current_path
+
+        sg_repo_bin="$SG_PATH/sgrade"
+        sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
+        if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
+            if echo $PATH | grep ${XDG_BIN_HOME:-$HOME/.local/bin}; then
+                sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
+                update=0
+            else
+                sg_bin="/usr/local/bin"
+                update=0
+            fi
+        fi
+
+        if [ $updated = 1 ]; then
+            printf "This will place the new sgrade in $sg_bin, \
+do you want to update/install [y/N]? "
+                read answer
+                if [ "$answer" != "${answer#[Yy]}" ]; then
+                    echo $sg_bin | grep $HOME && cp $sg_repo_bin $sg_bin || $SU cp $sg_repo_bin $sg_bin
+                    echo
+                    echo "You have to re-execute after updates!"
+                    exit
+                else
+                    status sgrade XX "You refused to update sgrade!"
+                fi
         fi
     else
         status sgrade XX "You need git to update sgrade automatically!"
