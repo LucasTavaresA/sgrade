@@ -168,7 +168,7 @@ update_cargo () {
     if has cargo; then
         heading CARGO
         if has cargo-install-update; then
-            cargo install-update -a 2> /dev/null && status cargo OK || status cargo XX
+            cargo install-update -g -a && status cargo OK || status cargo XX
         else
             status cargo XX "Install cargo-update!"
         fi
