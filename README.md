@@ -23,6 +23,7 @@ to the resource names separated by space, like: `packages etc cargo`
 
 | Resource   | Description                                                                                                            |
 |:----------:|:-----------------------------------------------------------------------------------------------------------------------|
+| `sgrade`   | Updates sgrade automatically, See [Update itself](https://github.com/LucasTavaresA/sgrade#update-itself)               |
 | `packages` | Updates packages and your system using your distro package manager.                                                    |
 | `etc`      | On arch based distros merge new versions of system files that come after updates, **depends on pacman-contrib**.       |
 | `nodejs`   | Run `yarn global update` if it is installed, or `npm update -g` if `npm root -g` is a path inside your home directory. |
@@ -38,3 +39,11 @@ to the resource names separated by space, like: `packages etc cargo`
 | `pearl`    | Run `pearl update`.                                                                                                    |
 | `gem`      | Run `gem upgrade --user-install` if `~/.gem` exists.                                                                   |
 | `custom`   | Run `~/.config/sgrade/custom`.                                                                                         |
+
+## Update itself
+
+Keeps and pulls a clone of sgrade in `$XDG_DATA_HOME/sgrade` or `$HOME/.local/share/sgrade`,
+You can change that by changing `SG_PATH` to a different location
+
+Then it substitutes the sgrade script in your path when they differ.
+

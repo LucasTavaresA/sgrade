@@ -45,6 +45,41 @@ as_su () {
     eval su root -c \'"$*"\'
 }
 
+update_sgrade () {
+    heading SGRADE
+    if has git; then
+        current_path=$(pwd)
+        [ -z "$SG_PATH" ] && SG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/sgrade"
+        if [ ! -d "$SG_PATH" ]; then
+            git clone https://github.com/lucastavaresa/sgrade $SG_PATH
+        else
+            cd $SG_PATH && git pull --rebase && cd $current_path
+        fi
+
+        if has sgrade; then
+            sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
+        else
+            sg_bin="/usr/local/bin/sgrade"
+        fi
+        sg_new_bin="$SG_PATH/sgrade"
+
+        if [ ! -z "$(diff -qN $sg_new_bin $sg_bin)" ]; then
+            printf "This will substitute sgrade in your path with the new one, \
+or copy sgrade to /usr/local/bin !\nNew sgrade version, do you want to update [y/N]? "
+                            read answer
+                            if [ "$answer" != "${answer#[Yy]}" ]; then
+                                $SU cp $sg_new_bin $sg_bin
+                                echo "You have to re-execute after updates!"
+                                exit
+                            else
+                                status update-sgrade XX "You refused to update sgrade!"
+                            fi
+        fi
+    else
+        status update-sgrade XX "You need git to update sgrade automatically!"
+    fi
+}
+
 update_packages () {
     heading PACKAGES
     if has paru; then
@@ -210,7 +245,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
