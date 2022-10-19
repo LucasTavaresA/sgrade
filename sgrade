@@ -2,6 +2,15 @@
 #
 # sgrade - Simple alternative to topgrade.
 status () {
+    if [ -z "$4" ] && [ "$2" = "XX" ]; then
+        printf "Retry? (y)es/(N)o/(q)uit? "
+        read answer
+        if [ "$answer" != "${answer#[Yy]}" ]; then
+            update_$1
+        elif [ "$answer" != "${answer#[Qq]}" ]; then
+            exit
+        fi
+    fi
     status="$status$1 $2!  $3\n"
 }
 
