@@ -156,18 +156,23 @@ update_dotnet () {
     fi
 }
 
-update_fish () {
-    if has fish; then
-        heading FISH
-        fish -c "fisher update" && status fish OK || status fish XX
+update_fisher () {
+    if fish -c "fisher" 2>/dev/null; then
+        heading FISHER
+        fish -c "fisher update" && status fisher OK || status fisher XX
+    else
+        status fisher XX "Install fisher!"
     fi
 }
 
 update_rustup () {
     if has rustup; then
         heading RUSTUP
-        rustup update && status rustup OK || status rustup XX
-        rustup self-update
+        if whereis rustup | cut -d' ' -f 2 | grep $HOME; then
+            rustup self-update && status rustup OK || status rustup XX
+        else
+            rustup update && status rustup OK || status rustup XX
+        fi
     fi
 }
 
