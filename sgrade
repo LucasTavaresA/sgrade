@@ -160,8 +160,10 @@ update_pip () {
 update_dotnet () {
     if has dotnet; then
         heading DOTNET
-        dotnet tool update $(dotnet tool list --global | sed '1,2d;s/ .*//') --global \
-            && status dotnet OK || status dotnet XX
+        to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
+        if [ ! -z "$to_update" ]; then
+            dotnet tool update $to_update --global && status dotnet OK || status dotnet XX
+        fi
     fi
 }
 
