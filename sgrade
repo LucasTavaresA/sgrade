@@ -172,6 +172,8 @@ update_dotnet () {
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
         if [ ! -z "$to_update" ]; then
             dotnet tool update $to_update --global && status dotnet OK || status dotnet XX
+        else
+            status dotnet OK "No dotnet packages!"
         fi
     fi
 }
