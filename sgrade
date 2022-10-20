@@ -179,11 +179,13 @@ update_dotnet () {
 }
 
 update_fisher () {
-    if fish -c "fisher" 2>/dev/null; then
-        heading FISHER
-        fish -c "fisher update" && status fisher OK || status fisher XX
-    else
-        status fisher XX "Install fisher!"
+    if has fish; then
+        if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fisher.fish" ]; then
+            heading FISHER
+            fish -c "fisher update" && status fisher OK || status fisher XX
+        else
+            status fisher XX "Install fisher!"
+        fi
     fi
 }
 
