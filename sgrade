@@ -2,7 +2,7 @@
 #
 # sgrade - Simple alternative to topgrade.
 status () {
-    if [ -z "$4" ] && [ "$2" = "XX" ]; then
+    if [ -z "$3" ] && [ "$2" = "XX" ]; then
         printf "Retry? (y)es/(N)o/(q)uit? "
         read answer
         if [ "$answer" != "${answer#[Yy]}" ]; then
@@ -62,11 +62,11 @@ update_sgrade () {
             git clone https://github.com/lucastavaresa/sgrade $SG_PATH
         fi
 
-        updated=0
+        update=0
         current_path=$(pwd)
 
         cd $SG_PATH && git fetch && [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ] \
-            && git pull --rebase && updated=1
+            && git pull --rebase && update=1
 
         cd $current_path
 
@@ -75,14 +75,14 @@ update_sgrade () {
         if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
             if echo $PATH | grep ${XDG_BIN_HOME:-$HOME/.local/bin}; then
                 sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
-                update=0
+                update=1
             else
                 sg_bin="/usr/local/bin"
-                update=0
+                update=1
             fi
         fi
 
-        if [ $updated = 1 ]; then
+        if [ $update = 1 ]; then
             printf "This will place the new sgrade in $sg_bin, \
 do you want to update/install [y/N]? "
                 read answer
@@ -125,9 +125,7 @@ update_packages () {
     elif has pkg; then
         $SU pkg upgrade && status packages OK || status packages XX
         $SU pkg audit -Fr
-        if has freebsd-update; then
-            update_freebsd
-        fi
+        update_freebsd
     fi
 }
 
@@ -279,7 +277,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fisher rustup cargo flatpak snap brew nix pearl gem custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
