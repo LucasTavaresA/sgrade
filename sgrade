@@ -62,11 +62,9 @@ update_sgrade () {
             git clone https://github.com/lucastavaresa/sgrade $SG_PATH
         fi
 
-        update=0
         current_path=$(pwd)
 
-        cd $SG_PATH && git fetch && [ $(git rev-parse HEAD) != $(git rev-parse @{u}) ] \
-            && git pull --rebase && update=1
+        cd $SG_PATH && git pull --rebase
 
         cd $current_path
 
@@ -75,14 +73,21 @@ update_sgrade () {
         if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
             if echo $PATH | grep ${XDG_BIN_HOME:-$HOME/.local/bin}; then
                 sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
-                update=1
             else
                 sg_bin="/usr/local/bin"
-                update=1
             fi
         fi
 
-        if [ $update = 1 ]; then
+        sg_diff_file="${XDG_CACHE_HOME:-$HOME/.cache}/sg_diff.diff"
+        diff -N $sg_repo_bin $sg_bin > $sg_diff_file
+
+        if [ ! -z "$(cat $sg_diff_file)" ]; then
+            printf "There is a new sgrade file, want to see the difference [Y/n]? "
+            read answer
+            if [ "$answer" = "${answer#[Nn]}" ]; then
+                ${VISUAL:-$EDITOR} $sg_diff_file
+            fi
+
             printf "This will place the new sgrade in $sg_bin, \
 do you want to update/install [y/N]? "
                 read answer
