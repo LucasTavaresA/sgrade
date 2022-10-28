@@ -38,6 +38,7 @@ to the resource names separated by space, like: `packages etc cargo`
 | `nix`      | Update all nix packages.                                                                                               |
 | `pearl`    | Run `pearl update`.                                                                                                    |
 | `gem`      | Run `gem upgrade --user-install` if `~/.gem` exists.                                                                   |
+| `gh`       | Update all gh extensions.                                                                                              |
 | `custom`   | Run `~/.config/sgrade/custom`.                                                                                         |
 
 ## Update itself

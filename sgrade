@@ -262,6 +262,13 @@ update_gem () {
     fi
 }
 
+update_gh () {
+    if has gh; then
+        heading GH
+        gh extension upgrade --all
+    fi
+}
+
 update_custom () {
     if [ -e ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom ]; then
         heading CUSTOM
@@ -286,7 +293,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fisher rustup cargo flatpak snap brew nix pearl gem custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fisher rustup cargo flatpak snap brew nix pearl gem gh custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
