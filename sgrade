@@ -25,12 +25,14 @@ retry () {
 help () {
     cat <<EOF
 ${0##*/}            update
+${0##*/} -d         show stderr (debug mode)
 ${0##*/} -h --help  show help
 EOF
 exit 0
 }
 
 heading () {
+    set +x
     echo
     cols=$(tput cols)
     center=$((cols/2))
@@ -56,6 +58,7 @@ heading () {
     echo "$col"
     col=""
     echo
+    $SG_DEBUG && set -x
 }
 
 # This is just a simple wrapper around 'command -v' to avoid
@@ -293,7 +296,9 @@ update_custom () {
 }
 
 main() {
+    SG_DEBUG=false
     case $* in
+        -d) SG_DEBUG=true ;;
         -h) help ;;
         --help) help ;;
     esac
