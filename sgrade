@@ -1,6 +1,10 @@
 #!/usr/bin/env sh
 #
 # sgrade - Simple alternative to topgrade.
+
+# Concatenates the status of all the updates in the variable $status
+# and executes retry() when the command failed $2
+# and doesn't have a reason $3 to fail
 status () {
     if [ -z "$3" ] && [ "$2" = "XX" ]; then
         retry
