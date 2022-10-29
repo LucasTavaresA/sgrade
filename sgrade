@@ -99,7 +99,7 @@ do you want to update/install [y/N]? "
                     echo $sg_bin | grep $HOME && cp $sg_repo_bin $sg_bin || $SU cp $sg_repo_bin $sg_bin
                     echo
                     echo "You have to re-execute after updates!"
-                    exit
+                    exit 0
                 else
                     status sgrade XX "You refused to update sgrade!"
                 fi
