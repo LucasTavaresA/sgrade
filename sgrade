@@ -22,6 +22,14 @@ retry () {
     fi
 }
 
+help () {
+    cat <<EOF
+${0##*/}            update
+${0##*/} -h --help  show help
+EOF
+exit 0
+}
+
 heading () {
     echo
     cols=$(tput cols)
@@ -285,6 +293,11 @@ update_custom () {
 }
 
 main() {
+    case $* in
+        -h) help ;;
+        --help) help ;;
+    esac
+
     if has doas; then
         SU=doas
     elif has sudo; then
