@@ -98,7 +98,7 @@ update_sgrade () {
         fi
 
         sg_diff_file="${XDG_CACHE_HOME:-$HOME/.cache}/sg_diff.diff"
-        diff -N $sg_repo_bin $sg_bin > $sg_diff_file
+        diff -N $sg_bin $sg_repo_bin > $sg_diff_file
 
         if [ ! -z "$(cat $sg_diff_file)" ]; then
             printf "There is a new sgrade file, want to see the difference [Y/n]? "
