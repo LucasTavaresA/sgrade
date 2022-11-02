@@ -153,6 +153,8 @@ update_packages () {
     elif has pkg_add; then
         $SU pkg_add -u && status packages OK || status packages XX
         update_openbsd
+    elif has pkgin; then
+        $SU pkgin upgrade && status packages OK || status packages XX
     fi
 }
 
