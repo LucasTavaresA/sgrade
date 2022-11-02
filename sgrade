@@ -150,6 +150,9 @@ update_packages () {
         $SU pkg upgrade && status packages OK || status packages XX
         $SU pkg audit -Fr
         update_freebsd
+    elif has pkg_add; then
+        $SU pkg_add -u && status packages OK || status packages XX
+        update_openbsd
     fi
 }
 
@@ -157,6 +160,13 @@ update_freebsd () {
     if has freebsd-update; then
         heading FREEBSD
         $SU freebsd-update fetch install && status freebsd OK || status freebsd XX
+    fi
+}
+
+update_openbsd () {
+    if has sysupgrade; then
+        heading OPENBSD
+        $SU sysupgrade -n && status packages OK || status packages XX
     fi
 }
 
