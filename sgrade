@@ -214,7 +214,7 @@ update_dotnet () {
     fi
 }
 
-update_fisher () {
+update_fish () {
     if has fish; then
         if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fisher.fish" ]; then
             heading FISHER
@@ -338,7 +338,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fisher rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
