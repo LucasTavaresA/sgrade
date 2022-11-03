@@ -29,7 +29,7 @@ to the resource names separated by space, like: `packages etc cargo`
 | `nodejs`    | Run `yarn global update` if it is installed, or `npm update -g` if `npm root -g` is a path inside your home directory. |
 | `pip`       | Update all pip packages.                                                                                               |
 | `dotnet`    | Update all global dotnet packages.                                                                                     |
-| `fish`      | Update all fish plugins if `fisher` is installed.                                                                      |
+| `fish`      | Update all fish plugins.                                                                      |
 | `rustup`    | Run `rustup update` and `rustup self-update`.                                                                          |
 | `cargo`     | Update all cargo packages if `cargo-update` is installed.                                                              |
 | `flatpak`   | Update all flatpaks.                                                                                                   |
