@@ -297,14 +297,14 @@ update_gem () {
 update_gh () {
     if has gh; then
         heading GH
-        gh extension upgrade --all
+        gh extension upgrade --all && status gh OK || status gh XX
     fi
 }
 
 update_distrobox () {
     if has distrobox; then
         heading DISTROBOX
-        distrobox upgrade --all
+        distrobox upgrade --all && status distrobox OK || status distrobox XX
     fi
 }
 
