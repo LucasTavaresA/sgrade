@@ -47,5 +47,6 @@ to the resource names separated by space, like: `packages etc cargo`
 Keeps and pulls a clone of sgrade in `$XDG_DATA_HOME/sgrade` or `$HOME/.local/share/sgrade`,
 You can change that by changing `SG_PATH` to a different location
 
-When the repo pulls a new version it asks to substitute the sgrade in your path
+When the repo pulls a new version it shows the difference in the new version
+and asks to substitute the sgrade in your path
 
