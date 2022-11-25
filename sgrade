@@ -23,11 +23,11 @@ retry () {
 }
 
 help () {
-    cat <<EOF
-${0##*/}            update
-${0##*/} -d         show stderr (debug mode)
-${0##*/} -h --help  show help
-EOF
+    printf "\
+%s            update
+%s -d         show stderr (debug mode)
+%s -h --help  show help\
+" "${0##*/}" "${0##*/}" "${0##*/}"
 exit 0
 }
 
