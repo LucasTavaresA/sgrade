@@ -39,27 +39,40 @@ exit 0
 heading () {
     set +x
     echo
+    time="$(date '+%X')"
+    if [ -z "$seconds" ]; then
+        seconds="$(date '+%s')"
+    else
+        newseconds="$(date '+%s')"
+        elapsed="$((newseconds - seconds))"
+        elapsed="$(date -ud @$elapsed +' last took: %X')"
+        seconds="$newseconds"
+    fi
     cols=$(tput cols)
-    center=$((cols/2))
-    header="$1"
+    center=$((cols / 2))
+    header=" $1 "
     headersize="${#header}"
-    indent=$((center-(headersize/2)))
+    timesize="${#time}"
+    elapsedsize="${#elapsed}"
+    indent=$((center - (headersize / 2)))
     meio=0
 
-    i=0
-    while [ $i -lt "$cols" ]; do
+    col="$CYAN${time}$WHITE "
+    i=$((timesize+1))
+    while [ $i -lt "$((cols - elapsedsize))" ]; do
         if [ $i -lt $indent ]; then
             col="${col}─"
-        elif [ $i -gt $((indent+2+headersize)) ]; then
+        elif [ $i -gt $((indent + headersize)) ]; then
             col="${col}─"
         elif [ $meio = 0 ]; then
-            col="${col} $header "
+            col="${col}${CYAN}$header$WHITE"
             meio=1
         fi
 
-        i=$((i+1))
+        i=$((i + 1))
     done
 
+    col="${col}$YELLOW${elapsed}$WHITE"
     echo "$col"
     col=""
     echo
