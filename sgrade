@@ -179,6 +179,8 @@ update_etc () {
     if has pacdiff; then
         heading ETC
         $SU pacdiff && status etc OK || status etc XX
+    else
+        status etc XX "Install pacman-contrib! \$ pacman -S pacman-contrib"
     fi
 }
 
@@ -211,7 +213,7 @@ update_go () {
         if has gup; then
             gup update && status go OK || status go XX
         else
-            status go XX "Install gup!"
+            status go XX "Install gup! https://github.com/nao1215/gup"
         fi
     fi
 }
@@ -257,7 +259,7 @@ update_cargo () {
         if has cargo-install-update; then
             cargo install-update -g -a && status cargo OK || status cargo XX
         else
-            status cargo XX "Install cargo-update!"
+            status cargo XX "Install cargo-update! \$ cargo install cargo-update"
         fi
     fi
 }
