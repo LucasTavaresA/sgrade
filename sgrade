@@ -16,9 +16,13 @@ exec_status () {
 }
 
 retry () {
-    printf "Retry? (y)es/(N)o/(q)uit? "
+    printf "Retry updating %s? (s)hell/(y)es/(N)o/(q)uit? " "$resource"
     read -r answer
-    if [ "$answer" != "${answer#[Yy]}" ]; then
+    if [ "$answer" != "${answer#[Ss]}" ]; then
+        echo "${YELLOW}You will be sent back to where you stop after exiting this shell!$WHITE"
+        ${SHELL:-/usr/bin/env sh} -i
+        retry "$resource"
+    elif [ "$answer" != "${answer#[Yy]}" ]; then
         "update_$1"
     elif [ "$answer" != "${answer#[Qq]}" ]; then
         exit 0
