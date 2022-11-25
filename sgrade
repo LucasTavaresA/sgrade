@@ -7,16 +7,16 @@
 # and doesn't have a reason $3 to fail
 status () {
     if [ -z "$3" ] && [ "$2" = "XX" ]; then
-        retry $1
+        retry "$1"
     fi
     status="$status$1 $2!  $3\n"
 }
 
 retry () {
     printf "Retry? (y)es/(N)o/(q)uit? "
-    read answer
+    read -r answer
     if [ "$answer" != "${answer#[Yy]}" ]; then
-        update_$1
+        "update_$1"
     elif [ "$answer" != "${answer#[Qq]}" ]; then
         exit 0
     fi
@@ -42,7 +42,7 @@ heading () {
     meio=0
 
     i=0
-    while [ $i -lt $cols ]; do
+    while [ $i -lt "$cols" ]; do
         if [ $i -lt $indent ]; then
             col="${col}─"
         elif [ $i -gt $((indent+2+headersize)) ]; then
@@ -78,19 +78,17 @@ update_sgrade () {
     if has git; then
         [ -z "$SG_PATH" ] && SG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/sgrade"
         if [ ! -d "$SG_PATH" ]; then
-            git clone https://github.com/lucastavaresa/sgrade $SG_PATH
+            git clone https://github.com/lucastavaresa/sgrade "$SG_PATH"
         fi
 
-        current_path=$(pwd)
-
-        cd $SG_PATH && git pull --rebase
-
-        cd $current_path
+        (
+        cd "$SG_PATH" && git pull --rebase
+        )
 
         sg_repo_bin="$SG_PATH/sgrade"
         sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
         if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
-            if echo $PATH | grep ${XDG_BIN_HOME:-$HOME/.local/bin}; then
+            if echo "$PATH" | grep "${XDG_BIN_HOME:-$HOME/.local/bin}"; then
                 sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
             else
                 sg_bin="/usr/local/bin"
@@ -98,20 +96,20 @@ update_sgrade () {
         fi
 
         sg_diff_file="${XDG_CACHE_HOME:-$HOME/.cache}/sg_diff.diff"
-        diff -N $sg_bin $sg_repo_bin > $sg_diff_file
+        diff -N "$sg_bin" "$sg_repo_bin" > "$sg_diff_file"
 
-        if [ ! -z "$(cat $sg_diff_file)" ]; then
+        if [ -n "$(cat "$sg_diff_file")" ]; then
             printf "There is a new sgrade file, want to see the difference [Y/n]? "
-            read answer
+            read -r answer
             if [ "$answer" = "${answer#[Nn]}" ]; then
-                ${VISUAL:-$EDITOR} $sg_diff_file
+                ${VISUAL:-$EDITOR} "$sg_diff_file"
             fi
 
-            printf "This will place the new sgrade in $sg_bin, \
-do you want to update/install [y/N]? "
-                read answer
+            printf "This will place the new sgrade in %s,\
+do you want to update/install [y/N]? " "$sg_bin"
+                read -r answer
                 if [ "$answer" != "${answer#[Yy]}" ]; then
-                    echo $sg_bin | grep $HOME && cp $sg_repo_bin $sg_bin || $SU cp $sg_repo_bin $sg_bin
+                    echo "$sg_bin" | grep "$HOME" && cp "$sg_repo_bin" "$sg_bin" || $SU cp "$sg_repo_bin" "$sg_bin"
                     echo
                     echo "You have to re-execute after updates!"
                     exit 0
@@ -191,7 +189,7 @@ update_nodejs () {
             yarn global update && status nodejs OK || status nodejs XX
         elif has npm; then
             heading NPM
-            if npm root --location=global | grep $HOME; then
+            if npm root --location=global | grep "$HOME"; then
                 npm update --location=global && status nodejs OK || status nodejs XX
             fi
         else
@@ -203,6 +201,7 @@ update_nodejs () {
 update_pip () {
     if has pip; then
         heading PIP
+        # shellcheck disable=SC2046
         pip install $(pip freeze | sed 's/==/>=/;/.*@.*$/d') --upgrade && status pip OK || status pip XX
     fi
 }
@@ -222,8 +221,8 @@ update_dotnet () {
     if has dotnet; then
         heading DOTNET
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
-        if [ ! -z "$to_update" ]; then
-            dotnet tool update $to_update --global && status dotnet OK || status dotnet XX
+        if [ -n "$to_update" ]; then
+            dotnet tool update "$to_update" --global && status dotnet OK || status dotnet XX
         else
             status dotnet OK "No dotnet packages!"
         fi
@@ -245,7 +244,7 @@ update_fish () {
 update_rustup () {
     if has rustup; then
         heading RUSTUP
-        if whereis rustup | cut -d' ' -f 2 | grep $HOME; then
+        if whereis rustup | cut -d' ' -f 2 | grep "$HOME"; then
             rustup self-update && status rustup OK || status rustup XX
         else
             rustup update && status rustup OK || status rustup XX
@@ -325,9 +324,9 @@ update_distrobox () {
 }
 
 update_custom () {
-    if [ -e ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom ]; then
+    if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom" ]; then
         heading CUSTOM
-        ${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom && status custom OK || status custom XX
+        "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom" && status custom OK || status custom XX
     fi
 }
 
