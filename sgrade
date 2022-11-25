@@ -129,11 +129,14 @@ update_packages () {
     if has paru; then
         paru -Pw
         paru --color always -Syu && status packages OK || status packages XX
+        update_etc
     elif has yay; then
         yay -Pw
         yay --color always -Syu && status packages OK || status packages XX
+        update_etc
     elif has pacman; then
         $SU pacman --color always -Syu && status packages OK || status packages XX
+        update_etc
     elif has xbps-install; then
         $SU xbps-install -Su && status packages OK || status packages XX
     elif has apt; then
@@ -350,7 +353,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
+        set +f -- ${SG_RESOURCES-sgrade packages nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
