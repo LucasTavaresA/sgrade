@@ -2,14 +2,12 @@
 #
 # sgrade - Simple alternative to topgrade.
 
-# Concatenates the status of all the updates in the variable $status
-# and executes retry() when the command failed $2
-# and doesn't have a reason $3 to fail
-status () {
-    if [ -z "$3" ] && [ "$2" = "XX" ]; then
-        retry "$1"
+exec_status () {
+    if "$@"; then
+        status="$status$resource OK!\n"
+    else
+        retry "$resource"
     fi
-    status="$status$1 $2!  $3\n"
 }
 
 retry () {
@@ -19,6 +17,8 @@ retry () {
         "update_$1"
     elif [ "$answer" != "${answer#[Qq]}" ]; then
         exit 0
+    else
+        status="$status$resource XX!\n"
     fi
 }
 
@@ -109,16 +109,20 @@ update_sgrade () {
 do you want to update/install [y/N]? " "$sg_bin"
                 read -r answer
                 if [ "$answer" != "${answer#[Yy]}" ]; then
-                    echo "$sg_bin" | grep "$HOME" && cp "$sg_repo_bin" "$sg_bin" || $SU cp "$sg_repo_bin" "$sg_bin"
+                    if echo "$sg_bin" | grep "$HOME"; then
+                        cp "$sg_repo_bin" "$sg_bin"
+                    else
+                        "$SU" cp "$sg_repo_bin" "$sg_bin"
+                    fi
                     echo
                     echo "You have to re-execute after updates!"
                     exit 0
                 else
-                    status sgrade XX "You refused to update sgrade!"
+                    status="${status}sgrade XX! You refused to update sgrade!\n"
                 fi
         fi
     else
-        status sgrade XX "You need git to update sgrade automatically!"
+        status="${status}sgrade XX! You need git to update sgrade automatically!\n"
     fi
 }
 
@@ -126,59 +130,59 @@ update_packages () {
     heading PACKAGES
     if has paru; then
         paru -Pw
-        paru --color always -Syu && status packages OK || status packages XX
+        exec_status paru --color always -Syu
         update_etc
     elif has yay; then
         yay -Pw
-        yay --color always -Syu && status packages OK || status packages XX
+        exec_status yay --color always -Syu
         update_etc
     elif has pacman; then
-        $SU pacman --color always -Syu && status packages OK || status packages XX
+        exec_status "$SU" pacman --color always -Syu
         update_etc
     elif has xbps-install; then
-        $SU xbps-install -Su && status packages OK || status packages XX
+        exec_status "$SU" xbps-install -Su
     elif has apt; then
-        $SU apt update && $SU apt dist-upgrade && status packages OK || status packages XX
+        exec_status "$SU" apt update && "$SU" apt dist-upgrade
     elif has dnf; then
-        $SU dnf upgrade && status packages OK || status packages XX
+        exec_status "$SU" dnf upgrade
     elif has yum; then
-        $SU yum upgrade && status packages OK || status packages XX
+        exec_status "$SU" yum upgrade
     elif has swupd; then
-        $SU swupd update && status packages OK || status packages XX
+        exec_status "$SU" swupd update
     elif has zypper; then
-        $SU zypper refresh && $SU zypper dist-upgrade && status packages OK || status packages XX
+        exec_status "$SU" zypper refresh && "$SU" zypper dist-upgrade
     elif has pkg; then
-        $SU pkg upgrade && status packages OK || status packages XX
-        $SU pkg audit -Fr
+        exec_status "$SU" pkg upgrade
+        "$SU" pkg audit -Fr
         update_freebsd
     elif has pkg_add; then
-        $SU pkg_add -u && status packages OK || status packages XX
+        exec_status "$SU" pkg_add -u
         update_openbsd
     elif has pkgin; then
-        $SU pkgin upgrade && status packages OK || status packages XX
+        exec_status "$SU" pkgin upgrade
     fi
 }
 
 update_freebsd () {
     if has freebsd-update; then
         heading FREEBSD
-        $SU freebsd-update fetch install && status freebsd OK || status freebsd XX
+        exec_status "$SU" freebsd-update fetch install
     fi
 }
 
 update_openbsd () {
     if has sysupgrade; then
         heading OPENBSD
-        $SU sysupgrade -n && status packages OK || status packages XX
+        exec_status "$SU" sysupgrade -n
     fi
 }
 
 update_etc () {
     if has pacdiff; then
         heading ETC
-        $SU pacdiff && status etc OK || status etc XX
+        exec_status "$SU" pacdiff
     else
-        status etc XX "Install pacman-contrib! \$ pacman -S pacman-contrib"
+        status="${status}etc XX! Install pacman-contrib! \$ pacman -S pacman-contrib\n"
     fi
 }
 
@@ -186,14 +190,14 @@ update_nodejs () {
     if has node; then
         if has yarn; then
             heading YARN
-            yarn global update && status nodejs OK || status nodejs XX
+            exec_status yarn global update
         elif has npm; then
             heading NPM
             if npm root --location=global | grep "$HOME"; then
-                npm update --location=global && status nodejs OK || status nodejs XX
+                exec_status npm update --location=global
             fi
         else
-            status nodejs XX "Install yarn or npm!"
+            status="${status}nodejs XX! Install yarn or npm!\n"
         fi
     fi
 }
@@ -202,7 +206,7 @@ update_pip () {
     if has pip; then
         heading PIP
         # shellcheck disable=SC2046
-        pip install $(pip freeze | sed 's/==/>=/;/.*@.*$/d') --upgrade && status pip OK || status pip XX
+        exec_status pip install $(pip freeze | sed 's/==/>=/;/.*@.*$/d') --upgrade
     fi
 }
 
@@ -210,9 +214,9 @@ update_go () {
     if has go; then
         heading GO
         if has gup; then
-            gup update && status go OK || status go XX
+            exec_status gup update
         else
-            status go XX "Install gup! https://github.com/nao1215/gup"
+            status="${status}go XX! Install gup! https://github.com/nao1215/gup\n"
         fi
     fi
 }
@@ -222,9 +226,9 @@ update_dotnet () {
         heading DOTNET
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
         if [ -n "$to_update" ]; then
-            dotnet tool update "$to_update" --global && status dotnet OK || status dotnet XX
+            exec_status dotnet tool update "$to_update" --global
         else
-            status dotnet OK "No dotnet packages!"
+            status="${status}dotnet OK! No dotnet packages!\n"
         fi
     fi
 }
@@ -233,10 +237,10 @@ update_fish () {
     if has fish; then
         if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fisher.fish" ]; then
             heading FISHER
-            fish -c "fisher update" && status fisher OK || status fisher XX
+            exec_status fish -c "fisher update"
         elif [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/fundle" ]; then
             heading FUNDLE
-            fish -c "fundle self-update && fundle update" && status fundle OK || status fundle XX
+            exec_status fish -c "fundle self-update && fundle update"
         fi
     fi
 }
@@ -245,9 +249,9 @@ update_rustup () {
     if has rustup; then
         heading RUSTUP
         if whereis rustup | cut -d' ' -f 2 | grep "$HOME"; then
-            rustup self-update && status rustup OK || status rustup XX
+            exec_status rustup self-update
         else
-            rustup update && status rustup OK || status rustup XX
+            exec_status rustup update
         fi
     fi
 }
@@ -256,9 +260,9 @@ update_cargo () {
     if has cargo; then
         heading CARGO
         if has cargo-install-update; then
-            cargo install-update -g -a && status cargo OK || status cargo XX
+            exec_status cargo install-update -g -a
         else
-            status cargo XX "Install cargo-update! \$ cargo install cargo-update"
+            status="${status}cargo XX! Install cargo-update! \$ cargo install cargo-update\n"
         fi
     fi
 }
@@ -266,35 +270,35 @@ update_cargo () {
 update_flatpak () {
     if has flatpak; then
         heading FLATPAK
-        flatpak update && status flatpak OK || status flatpak XX
+        exec_status flatpak update
     fi
 }
 
 update_snap () {
     if has snap; then
         heading SNAP
-        $SU snap refresh && status snap OK || status snap XX
+        exec_status "$SU" snap refresh
     fi
 }
 
 update_brew () {
     if has brew; then
         heading BREW
-        brew update && brew upgrade && status brew OK || status brew XX
+        exec_status brew update && brew upgrade
     fi
 }
 
 update_nix () {
     if has nix; then
         heading NIX
-        nix upgrade-nix && nix --upgrade && status nix OK || status nix XX
+        exec_status nix upgrade-nix && nix --upgrade
     fi
 }
 
 update_pearl () {
     if has pearl; then
         heading PEARL
-        pearl update && status pearl OK || status pearl XX
+        exec_status pearl update
     fi
 }
 
@@ -302,9 +306,9 @@ update_gem () {
     if has gem; then
         heading GEM
         if [ -d "$HOME/.gem" ]; then
-            gem upgrade --user-install && status gem OK || status gem XX
+            exec_status gem upgrade --user-install
         else
-            gem upgrade && status gem OK || status gem XX
+            exec_status gem upgrade
         fi
     fi
 }
@@ -312,21 +316,21 @@ update_gem () {
 update_gh () {
     if has gh; then
         heading GH
-        gh extension upgrade --all && status gh OK || status gh XX
+        exec_status gh extension upgrade --all
     fi
 }
 
 update_distrobox () {
     if has distrobox; then
         heading DISTROBOX
-        distrobox upgrade --all && status distrobox OK || status distrobox XX
+        exec_status distrobox upgrade --all
     fi
 }
 
 update_custom () {
     if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom" ]; then
         heading CUSTOM
-        "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom" && status custom OK || status custom XX
+        exec_status "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom"
     fi
 }
 
