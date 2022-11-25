@@ -1,10 +1,15 @@
 #!/usr/bin/env sh
 #
 # sgrade - Simple alternative to topgrade.
+RED="$(tput setaf 1)"
+GREEN="$(tput setaf 2)"
+YELLOW="$(tput setaf 3)"
+CYAN="$(tput setaf 6)"
+WHITE="$(tput setaf 7)"
 
 exec_status () {
     if "$@"; then
-        status="$status$resource OK!\n"
+        status="$status$resource ${GREEN}OK!$WHITE\n"
     else
         retry "$resource"
     fi
@@ -18,7 +23,7 @@ retry () {
     elif [ "$answer" != "${answer#[Qq]}" ]; then
         exit 0
     else
-        status="$status$resource XX!\n"
+        status="$status$resource ${RED}XX!$WHITE\n"
     fi
 }
 
@@ -118,11 +123,11 @@ do you want to update/install [y/N]? " "$sg_bin"
                     echo "You have to re-execute after updates!"
                     exit 0
                 else
-                    status="${status}sgrade XX! You refused to update sgrade!\n"
+                    status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
                 fi
         fi
     else
-        status="${status}sgrade XX! You need git to update sgrade automatically!\n"
+        status="${status}sgrade ${RED}XX! ${YELLOW}You need git to update sgrade automatically!$WHITE\n"
     fi
 }
 
@@ -182,7 +187,7 @@ update_etc () {
         heading ETC
         exec_status "$SU" pacdiff
     else
-        status="${status}etc XX! Install pacman-contrib! \$ pacman -S pacman-contrib\n"
+        status="${status}etc ${RED}XX! ${YELLOW}Install pacman-contrib! $GREEN\$ pacman -S pacman-contrib$WHITE\n"
     fi
 }
 
@@ -197,7 +202,7 @@ update_nodejs () {
                 exec_status npm update --location=global
             fi
         else
-            status="${status}nodejs XX! Install yarn or npm!\n"
+            status="${status}nodejs ${RED}XX! ${YELLOW}Install yarn or npm!$WHITE\n"
         fi
     fi
 }
@@ -216,7 +221,7 @@ update_go () {
         if has gup; then
             exec_status gup update
         else
-            status="${status}go XX! Install gup! https://github.com/nao1215/gup\n"
+            status="${status}go ${RED}XX! ${YELLOW}Install gup! https://github.com/nao1215/gup$WHITE\n"
         fi
     fi
 }
@@ -228,7 +233,7 @@ update_dotnet () {
         if [ -n "$to_update" ]; then
             exec_status dotnet tool update "$to_update" --global
         else
-            status="${status}dotnet OK! No dotnet packages!\n"
+            status="${status}dotnet ${GREEN}OK! ${CYAN}No dotnet packages!$WHITE\n"
         fi
     fi
 }
@@ -262,7 +267,7 @@ update_cargo () {
         if has cargo-install-update; then
             exec_status cargo install-update -g -a
         else
-            status="${status}cargo XX! Install cargo-update! \$ cargo install cargo-update\n"
+            status="${status}cargo ${RED}XX! ${YELLOW}Install cargo-update! $GREEN\$ cargo install cargo-update$WHITE\n"
         fi
     fi
 }
