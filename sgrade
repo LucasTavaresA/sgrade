@@ -6,6 +6,7 @@ GREEN="$(tput setaf 2)"
 YELLOW="$(tput setaf 3)"
 CYAN="$(tput setaf 6)"
 WHITE="$(tput setaf 7)"
+START_SECONDS="$(date '+%s')"
 
 exec_status () {
     if "$@"; then
@@ -389,7 +390,9 @@ main() {
     }
 
     heading RESULTS
-    echo "$status"
+    elapsed_time="$(($(date +'%s') - START_SECONDS))"
+    total_time="$CYAN$(date -ud @$elapsed_time +'Total time: %X')$WHITE\n"
+    echo "$status$total_time"
 }
 
 main "$@"
