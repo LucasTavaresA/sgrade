@@ -28,6 +28,7 @@ to the resource names separated by space, like: `packages etc cargo`
 | `etc`       | On arch based distros merge new versions of system files that come after updates, **depends on pacman-contrib**.       |
 | `nodejs`    | Run `yarn global update` if it is installed, or `npm update -g` if `npm root -g` is a path inside your home directory. |
 | `pip`       | Update all pip packages.                                                                                               |
+| `go`        | Update all go packages with [gup](https://github.com/nao1215/gup).                                                     |
 | `dotnet`    | Update all global dotnet packages.                                                                                     |
 | `fish`      | Update all fish plugins.                                                                      |
 | `rustup`    | Run `rustup update` and `rustup self-update`.                                                                          |

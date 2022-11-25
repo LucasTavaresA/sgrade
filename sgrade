@@ -202,6 +202,17 @@ update_pip () {
     fi
 }
 
+update_go () {
+    if has go; then
+        heading GO
+        if has gup; then
+            gup update && status go OK || status go XX
+        else
+            status go XX "Install gup!"
+        fi
+    fi
+}
+
 update_dotnet () {
     if has dotnet; then
         heading DOTNET
@@ -339,7 +350,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource do
