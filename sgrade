@@ -8,7 +8,7 @@ CYAN="$(tput setaf 6)"
 WHITE="$(tput setaf 7)"
 START_SECONDS="$(date '+%s')"
 
-exec_status () {
+exec_status() {
     if "$@"; then
         status="$status$resource ${GREEN}OK!$WHITE\n"
     else
@@ -16,7 +16,7 @@ exec_status () {
     fi
 }
 
-retry () {
+retry() {
     printf "Retry updating %s? (s)hell/(y)es/(N)o/(q)uit? " "$resource"
     read -r answer
     if [ "$answer" != "${answer#[Ss]}" ]; then
@@ -32,16 +32,16 @@ retry () {
     fi
 }
 
-help () {
+help() {
     printf "\
 %s            update
 %s -d         show stderr (debug mode)
 %s -h --help  show help\
 " "${0##*/}" "${0##*/}" "${0##*/}"
-exit 0
+    exit 0
 }
 
-heading () {
+heading() {
     set +x
     echo
     time="$(date '+%X')"
@@ -63,7 +63,7 @@ heading () {
     meio=0
 
     col="$CYAN${time}$WHITE "
-    i=$((timesize+1))
+    i=$((timesize + 1))
     while [ $i -lt "$((cols - elapsedsize))" ]; do
         if [ $i -lt $indent ]; then
             col="${col}─"
@@ -87,16 +87,16 @@ heading () {
 # This is just a simple wrapper around 'command -v' to avoid
 # spamming '>/dev/null' throughout this function. This also guards
 # against aliases and functions.
-has () {
+has() {
     _cmd=$(command -v "$1") 2>/dev/null || return 1
     [ -x "$_cmd" ] || return 1
 }
 
-as_su () {
+as_su() {
     eval su root -c \'"$*"\'
 }
 
-update_sgrade () {
+update_sgrade() {
     heading SGRADE
     if has git; then
         [ -z "$SG_PATH" ] && SG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/sgrade"
@@ -105,7 +105,7 @@ update_sgrade () {
         fi
 
         (
-        cd "$SG_PATH" && git pull --rebase
+            cd "$SG_PATH" && git pull --rebase
         )
 
         sg_repo_bin="$SG_PATH/sgrade"
@@ -119,7 +119,7 @@ update_sgrade () {
         fi
 
         sg_diff_file="${XDG_CACHE_HOME:-$HOME/.cache}/sg_diff.diff"
-        diff -N "$sg_bin" "$sg_repo_bin" > "$sg_diff_file"
+        diff -N "$sg_bin" "$sg_repo_bin" >"$sg_diff_file"
 
         if [ -n "$(cat "$sg_diff_file")" ]; then
             printf "There is a new sgrade file, want to see the difference [Y/n]? "
@@ -130,26 +130,26 @@ update_sgrade () {
 
             printf "This will place the new sgrade in %s,\
 do you want to update/install [y/N]? " "$sg_bin"
-                read -r answer
-                if [ "$answer" != "${answer#[Yy]}" ]; then
-                    if echo "$sg_bin" | grep "$HOME"; then
-                        cp "$sg_repo_bin" "$sg_bin"
-                    else
-                        "$SU" cp "$sg_repo_bin" "$sg_bin"
-                    fi
-                    echo
-                    echo "You have to re-execute after updates!"
-                    exit 0
+            read -r answer
+            if [ "$answer" != "${answer#[Yy]}" ]; then
+                if echo "$sg_bin" | grep "$HOME"; then
+                    cp "$sg_repo_bin" "$sg_bin"
                 else
-                    status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
+                    "$SU" cp "$sg_repo_bin" "$sg_bin"
                 fi
+                echo
+                echo "You have to re-execute after updates!"
+                exit 0
+            else
+                status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
+            fi
         fi
     else
         status="${status}sgrade ${RED}XX! ${YELLOW}You need git to update sgrade automatically!$WHITE\n"
     fi
 }
 
-update_packages () {
+update_packages() {
     heading PACKAGES
     if has paru; then
         paru -Pw
@@ -186,21 +186,21 @@ update_packages () {
     fi
 }
 
-update_freebsd () {
+update_freebsd() {
     if has freebsd-update; then
         heading FREEBSD
         exec_status "$SU" freebsd-update fetch install
     fi
 }
 
-update_openbsd () {
+update_openbsd() {
     if has sysupgrade; then
         heading OPENBSD
         exec_status "$SU" sysupgrade -n
     fi
 }
 
-update_etc () {
+update_etc() {
     if has pacdiff; then
         heading ETC
         exec_status "$SU" pacdiff
@@ -209,7 +209,7 @@ update_etc () {
     fi
 }
 
-update_nodejs () {
+update_nodejs() {
     if has node; then
         if has yarn; then
             heading YARN
@@ -225,7 +225,7 @@ update_nodejs () {
     fi
 }
 
-update_pip () {
+update_pip() {
     if has pip; then
         heading PIP
         # shellcheck disable=SC2046
@@ -233,7 +233,7 @@ update_pip () {
     fi
 }
 
-update_go () {
+update_go() {
     if has go; then
         heading GO
         if has gup; then
@@ -244,7 +244,7 @@ update_go () {
     fi
 }
 
-update_dotnet () {
+update_dotnet() {
     if has dotnet; then
         heading DOTNET
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
@@ -256,7 +256,7 @@ update_dotnet () {
     fi
 }
 
-update_fish () {
+update_fish() {
     if has fish; then
         if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fisher.fish" ]; then
             heading FISHER
@@ -268,7 +268,7 @@ update_fish () {
     fi
 }
 
-update_rustup () {
+update_rustup() {
     if has rustup; then
         heading RUSTUP
         if whereis rustup | cut -d' ' -f 2 | grep "$HOME"; then
@@ -279,7 +279,7 @@ update_rustup () {
     fi
 }
 
-update_cargo () {
+update_cargo() {
     if has cargo; then
         heading CARGO
         if has cargo-install-update; then
@@ -290,42 +290,42 @@ update_cargo () {
     fi
 }
 
-update_flatpak () {
+update_flatpak() {
     if has flatpak; then
         heading FLATPAK
         exec_status flatpak update
     fi
 }
 
-update_snap () {
+update_snap() {
     if has snap; then
         heading SNAP
         exec_status "$SU" snap refresh
     fi
 }
 
-update_brew () {
+update_brew() {
     if has brew; then
         heading BREW
         exec_status brew update && brew upgrade
     fi
 }
 
-update_nix () {
+update_nix() {
     if has nix; then
         heading NIX
         exec_status nix upgrade-nix && nix --upgrade
     fi
 }
 
-update_pearl () {
+update_pearl() {
     if has pearl; then
         heading PEARL
         exec_status pearl update
     fi
 }
 
-update_gem () {
+update_gem() {
     if has gem; then
         heading GEM
         if [ -d "$HOME/.gem" ]; then
@@ -336,21 +336,21 @@ update_gem () {
     fi
 }
 
-update_gh () {
+update_gh() {
     if has gh; then
         heading GH
         exec_status gh extension upgrade --all
     fi
 }
 
-update_distrobox () {
+update_distrobox() {
     if has distrobox; then
         heading DISTROBOX
         exec_status distrobox upgrade --all
     fi
 }
 
-update_custom () {
+update_custom() {
     if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom" ]; then
         heading CUSTOM
         exec_status "${XDG_CONFIG_HOME:-$HOME/.config}/sgrade/custom"
@@ -384,7 +384,7 @@ main() {
         set +f -- ${SG_RESOURCES-sgrade packages nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
 
         # Iterate over the above list and run any existing "update_" functions.
-        for resource do
+        for resource; do
             "update_$resource"
         done
     }
