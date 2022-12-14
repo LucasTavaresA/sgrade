@@ -153,36 +153,36 @@ update_packages() {
     heading PACKAGES
     if has paru; then
         paru -Pw
-        exec_status paru --color always -Syu
+        exec_status paru --noconfirm --color always -Syu
         update_etc
     elif has yay; then
         yay -Pw
-        exec_status yay --color always -Syu
+        exec_status yay --noconfirm --color always -Syu
         update_etc
     elif has pacman; then
-        exec_status "$SU" pacman --color always -Syu
+        exec_status "$SU" pacman --noconfirm --color always -Syu
         update_etc
     elif has xbps-install; then
-        exec_status "$SU" xbps-install -Su
+        exec_status "$SU" xbps-install -Suy
     elif has apt; then
-        exec_status "$SU" apt update && "$SU" apt dist-upgrade
+        exec_status "$SU" apt update -y && "$SU" apt dist-upgrade -y
     elif has dnf; then
-        exec_status "$SU" dnf upgrade
+        exec_status "$SU" dnf upgrade -y
     elif has yum; then
-        exec_status "$SU" yum upgrade
+        exec_status "$SU" yum upgrade -y
     elif has swupd; then
-        exec_status "$SU" swupd update
+        exec_status "$SU" swupd update -y
     elif has zypper; then
-        exec_status "$SU" zypper refresh && "$SU" zypper dist-upgrade
+        exec_status "$SU" zypper refresh -y && "$SU" zypper dist-upgrade -y
     elif has pkg; then
-        exec_status "$SU" pkg upgrade
+        exec_status "$SU" pkg upgrade -y
         "$SU" pkg audit -Fr
         update_freebsd
     elif has pkg_add; then
-        exec_status "$SU" pkg_add -u
+        exec_status "$SU" pkg_add -uI
         update_openbsd
     elif has pkgin; then
-        exec_status "$SU" pkgin upgrade
+        exec_status "$SU" pkgin upgrade -y
     fi
 }
 
