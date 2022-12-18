@@ -248,11 +248,7 @@ update_dotnet() {
     if has dotnet; then
         heading DOTNET
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
-        if [ -n "${to_update}" ]; then
-            exec_status dotnet tool update "$to_update" --global
-        else
-            status="${status}dotnet ${GREEN}OK! ${CYAN}No dotnet packages!$WHITE\n"
-        fi
+        [ -n "${to_update}" ] && exec_status dotnet tool update "$to_update" --global
     fi
 }
 
