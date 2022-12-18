@@ -235,8 +235,8 @@ update_pip() {
 
 update_go() {
     if has go; then
-        heading GO
         if has gup; then
+            heading GO
             exec_status gup update
         else
             status="${status}go ${RED}XX! ${YELLOW}Install gup! https://github.com/nao1215/gup$WHITE\n"
@@ -246,9 +246,11 @@ update_go() {
 
 update_dotnet() {
     if has dotnet; then
-        heading DOTNET
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
-        [ -n "${to_update}" ] && exec_status dotnet tool update "$to_update" --global
+        if [ -n "${to_update}" ]; then
+            heading DOTNET
+            exec_status dotnet tool update "$to_update" --global
+        fi
     fi
 }
 
@@ -277,8 +279,8 @@ update_rustup() {
 
 update_cargo() {
     if has cargo; then
-        heading CARGO
         if has cargo-install-update; then
+            heading CARGO
             exec_status cargo install-update -g -a
         else
             status="${status}cargo ${RED}XX! ${YELLOW}Install cargo-update! $GREEN\$ cargo install cargo-update$WHITE\n"
