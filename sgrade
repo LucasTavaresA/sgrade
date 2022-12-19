@@ -257,7 +257,7 @@ update_dotnet() {
 update_fish() {
     if has fish; then
         heading FISH
-        exec_status fish -c "fish_update_completions"
+        fish -c "fish_update_completions"
         if [ -e "${XDG_CONFIG_HOME:-$HOME/.config}/fish/functions/fisher.fish" ]; then
             exec_status fish -c "fisher update"
         elif [ -d "${XDG_CONFIG_HOME:-$HOME/.config}/fundle" ]; then
