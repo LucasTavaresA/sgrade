@@ -143,6 +143,8 @@ do you want to update/install [y/N]? " "$sg_bin"
             else
                 status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
             fi
+        else
+            status="${status}sgrade ${GREEN}OK!$WHITE\n"
         fi
     else
         status="${status}sgrade ${RED}XX! ${YELLOW}You need git to update sgrade automatically!$WHITE\n"
