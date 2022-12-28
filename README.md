@@ -4,6 +4,8 @@ Simple alternative to [topgrade](https://github.com/topgrade-rs/topgrade)
 
 or Suckless, Shellscript... maybe S tier
 
+![screenshot](https://user-images.githubusercontent.com/80704612/209752444-2ec0ef56-8ddc-4d5f-80b9-d540727014e1.png)
+
 ## Install
 
 Put sgrade in your `PATH`, or execute:
