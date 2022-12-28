@@ -251,7 +251,18 @@ update_dotnet() {
         to_update="$(dotnet tool list --global | sed '1,2d;s/ .*//')"
         if [ -n "${to_update}" ]; then
             heading DOTNET
-            exec_status dotnet tool update "$to_update" --global
+            set -f
+            for tool in $to_update; do
+                if ! dotnet tool update --global "$tool"; then
+                    fails="$fails$tool "
+                fi
+            done
+            if [ -z "$fails" ]; then
+                status="$status$resource ${GREEN}OK!$WHITE\n"
+            else
+                status="$status$resource ${RED}XX! ${YELLOW}Failed to update: $fails$WHITE\n"
+            fi
+            set +f
         fi
     fi
 }
