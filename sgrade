@@ -403,7 +403,7 @@ main() {
     heading RESULTS
     elapsed_time="$(($(date +'%s') - START_SECONDS))"
     total_time="$CYAN$(date -ud @$elapsed_time +'Total time: %X')$WHITE"
-    status="$(echo "$status" | column -l 2 -s ' ')"
+    status="$(echo "$status" | column -t -l 2 -s ' ')"
     printf "%s\n%s\n" "$status" "$total_time"
 }
 
