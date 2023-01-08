@@ -33,7 +33,7 @@ to the resource names separated by space, like: `packages etc cargo`
 | `dotnet`    | Update all global dotnet packages.                                                                                                 |
 | `fish`      | Update all fish plugins.                                                                                                           |
 | `rustup`    | Run `rustup update` and `rustup self-update`.                                                                                      |
-| `cargo`     | Update all cargo packages using [cargo-update](https://github.com/nabijaczleweli/cargo-updat).                                     |
+| `cargo`     | Update all cargo packages using [cargo-update](https://github.com/nabijaczleweli/cargo-update).                                     |
 | `flatpak`   | Update all flatpaks.                                                                                                               |
 | `snap`      | Update all snaps.                                                                                                                  |
 | `brew`      | Update all brew packages.                                                                                                          |
@@ -46,9 +46,8 @@ to the resource names separated by space, like: `packages etc cargo`
 
 ## Update itself
 
-Keeps and pulls a clone of sgrade in `$XDG_DATA_HOME/sgrade` or `$HOME/.local/share/sgrade`,
-You can change that by changing `SG_PATH` to a different location
+Depends on curl or wget
 
-When the repo pulls a new version it shows the difference in the new version
+When a new version is downloaded it shows the difference in the new version
 and asks to substitute the sgrade in your path
 

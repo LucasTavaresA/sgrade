@@ -98,56 +98,55 @@ as_su() {
 
 update_sgrade() {
     heading SGRADE
-    if has git; then
-        [ -z "$SG_PATH" ] && SG_PATH="${XDG_DATA_HOME:-$HOME/.local/share}/sgrade"
-        if [ ! -d "$SG_PATH" ]; then
-            git clone https://github.com/lucastavaresa/sgrade "$SG_PATH"
-        fi
+    src="https://raw.githubusercontent.com/LucasTavaresA/sgrade/main/sgrade"
+    cache_dir="${XDG_CACHE_HOME:-$HOME/.cache}"
+    [ ! -d "$cache_dir" ] && mkdir "$cache_dir"
+    sg_new_bin="$cache_dir/sgrade"
 
-        (
-            cd "$SG_PATH" && git pull --rebase
-        )
+    if curl -s "$src" >"$sg_new_bin" || wget --quiet "$src" -O "$sg_new_bin"; then
+        chmod +x "$sg_new_bin"
+    else
+        status="${status}sgrade ${RED}XX! ${YELLOW}Failed to install/update \
+sgrade with curl/wget, check if of the two is installed!$WHITE\n"
+        return 1
+    fi
 
-        sg_repo_bin="$SG_PATH/sgrade"
-        sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
-        if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
-            if echo "$PATH" | grep "${XDG_BIN_HOME:-$HOME/.local/bin}"; then
-                sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
-            else
-                sg_bin="/usr/local/bin"
-            fi
-        fi
-
-        sg_diff_file="${XDG_CACHE_HOME:-$HOME/.cache}/sg_diff.diff"
-        diff -N "$sg_bin" "$sg_repo_bin" >"$sg_diff_file"
-
-        if [ -n "$(cat "$sg_diff_file")" ]; then
-            printf "There is a new sgrade file, want to see the difference [Y/n]? "
-            read -r answer
-            if [ "$answer" = "${answer#[Nn]}" ]; then
-                ${VISUAL:-$EDITOR} "$sg_diff_file"
-            fi
-
-            printf "This will place the new sgrade in %s,\
-do you want to update/install [y/N]? " "$sg_bin"
-            read -r answer
-            if [ "$answer" != "${answer#[Yy]}" ]; then
-                if echo "$sg_bin" | grep "$HOME"; then
-                    cp "$sg_repo_bin" "$sg_bin"
-                else
-                    "$SU" cp "$sg_repo_bin" "$sg_bin"
-                fi
-                echo
-                echo "You have to re-execute after updates!"
-                exit 0
-            else
-                status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
-            fi
+    sg_bin="$(whereis sgrade | cut -d' ' -f 2)"
+    if [ -z "$sg_bin" ] || [ ! -e "$sg_bin" ]; then
+        if echo "$PATH" | grep -q "${XDG_BIN_HOME:-$HOME/.local/bin}"; then
+            sg_bin="${XDG_BIN_HOME:-$HOME/.local/bin}/sgrade"
         else
-            status="${status}sgrade ${GREEN}OK!$WHITE\n"
+            sg_bin="/usr/local/bin/sgrade"
+        fi
+    fi
+
+    sg_diff_file="$cache_dir/sgrade.diff"
+    diff -N "$sg_new_bin" "$sg_bin" >"$sg_diff_file"
+
+    if [ -n "$(cat "$sg_diff_file")" ]; then
+        printf "There is a new sgrade file, want to see the difference [Y/n]? "
+        read -r answer
+        if [ "$answer" = "${answer#[Nn]}" ]; then
+            ${VISUAL:-$EDITOR} "$sg_diff_file"
+        fi
+
+        printf "This will place the new sgrade in %s, \
+do you want to update/install [y/N]? " "$sg_bin"
+        read -r answer
+        if [ "$answer" != "${answer#[Yy]}" ]; then
+            if echo "$sg_bin" | grep "$HOME"; then
+                cp "$sg_new_bin" "$sg_bin"
+            else
+                "$SU" cp "$sg_new_bin" "$sg_bin"
+            fi
+            echo
+            echo "You have to re-execute after updates!"
+            exit 0
+        else
+            status="${status}sgrade ${RED}XX! ${YELLOW}You refused to update sgrade!$WHITE\n"
         fi
     else
-        status="${status}sgrade ${RED}XX! ${YELLOW}You need git to update sgrade automatically!$WHITE\n"
+        status="${status}sgrade ${GREEN}OK!$WHITE\n"
     fi
 }
 
