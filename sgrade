@@ -165,6 +165,7 @@ update_packages() {
         update_etc
     elif has xbps-install; then
         exec_status "$SU" xbps-install -Suy
+        update_etc
     elif has apt; then
         exec_status "$SU" apt update -y && "$SU" apt dist-upgrade -y
     elif has dnf; then
@@ -205,8 +206,11 @@ update_etc() {
     if has pacdiff; then
         heading ETC
         exec_status "$SU" pacdiff
+    elif has xdiff; then
+        heading ETC
+        exec_status "$SU" xdiff
     else
-        status="${status}etc ${RED}XX! ${YELLOW}Install pacman-contrib! $GREEN\$ pacman -S pacman-contrib$WHITE\n"
+        status="${status}etc ${RED}XX! ${YELLOW}Install pacman-contrib or xtools!$WHITE\n"
     fi
 }
 
