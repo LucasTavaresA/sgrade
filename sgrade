@@ -155,17 +155,13 @@ update_packages() {
     if has paru; then
         paru -Pw
         exec_status paru --noconfirm --color always -Syu
-        update_etc
     elif has yay; then
         yay -Pw
         exec_status yay --noconfirm --color always -Syu
-        update_etc
     elif has pacman; then
         exec_status "$SU" pacman --noconfirm --color always -Syu
-        update_etc
     elif has xbps-install; then
         exec_status "$SU" xbps-install -Suy
-        update_etc
     elif has apt; then
         exec_status "$SU" apt update -y && "$SU" apt dist-upgrade -y
     elif has dnf; then
@@ -203,14 +199,20 @@ update_openbsd() {
 }
 
 update_etc() {
-    if has pacdiff; then
-        heading ETC
-        exec_status "$SU" pacdiff
-    elif has xdiff; then
-        heading ETC
-        exec_status "$SU" xdiff
-    else
-        status="${status}etc ${RED}XX! ${YELLOW}Install pacman-contrib or xtools!$WHITE\n"
+    if has xbps-install; then
+        if has xdiff; then
+            heading ETC
+            exec_status "$SU" xdiff
+        else
+            status="${status}etc ${RED}XX! ${YELLOW}Install xtools! $GREEN\$ xbps-install -S xtools$WHITE\n"
+        fi
+    elif has pacman; then
+        if has pacdiff; then
+            heading ETC
+            exec_status "$SU" pacdiff
+        else
+            status="${status}etc ${RED}XX! ${YELLOW}Install pacman-contrib! $GREEN\$ pacman -S pacman-contrib$WHITE\n"
+        fi
     fi
 }
 
@@ -395,7 +397,7 @@ main() {
         # Disable globbing and set the positional parameters to the
         # contents of 'SG_RESOURCES'.
         set -f
-        set +f -- ${SG_RESOURCES-sgrade packages nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
+        set +f -- ${SG_RESOURCES-sgrade packages etc nodejs pip go dotnet fish rustup cargo flatpak snap brew nix pearl gem gh distrobox custom}
 
         # Iterate over the above list and run any existing "update_" functions.
         for resource; do
