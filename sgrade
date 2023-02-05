@@ -235,8 +235,10 @@ update_nodejs() {
 update_pip() {
     if has pip; then
         heading PIP
-        # shellcheck disable=SC2046
-        exec_status pip install $(pip freeze | sed 's/==/>=/;/.*@.*$/d') --upgrade
+        to_update="$(pip list -o --user | sed '1,2d;s/ .*//')"
+
+        [ -n "$to_update" ] &&
+            exec_status pip install -U --user "$to_update"
     fi
 }
 
