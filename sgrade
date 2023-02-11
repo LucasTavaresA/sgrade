@@ -233,12 +233,17 @@ update_nodejs() {
 }
 
 update_pip() {
-    if has pip; then
-        heading PIP
-        to_update="$(pip list -o --user | sed '1,2d;s/ .*//')"
+    heading PIP
 
-        [ -n "$to_update" ] &&
-            exec_status pip install -U --user "$to_update"
+    if has pip; then
+        whereis pip | cut -d' ' -f 2 | grep -q "$HOME" && pip install -U --user pip
+        whereis pipx | cut -d' ' -f 2 | grep -q "$HOME" && pip install -U --user pipx
+    fi
+
+    if has pipx; then
+        exec_status pipx upgrade-all
+    else
+        status="${status}pipx ${RED}XX! ${YELLOW}Install pipx! https://github.com/pypa/pipx$WHITE\n"
     fi
 }
 

@@ -29,7 +29,7 @@ to the resource names separated by space, like: `packages etc cargo`
 | `packages`  | Updates packages and your system using your distro package manager, on arch based distros interactively merge pacnew files.        |
 | `etc`       | Merge new etc files.                                                                                                               |
 | `nodejs`    | Run `yarn global update`, or `npm update -g` if `npm root -g` is a path inside your home directory.                                |
-| `pip`       | Update all pip packages installed with `--user`.                                                                                   |
+| `pip`       | Update pip and pipx if they are inside $HOME, then upgrade all packages installed using [pipx](https://github.com/pypa/pipx).      |
 | `go`        | Update all go packages with [gup](https://github.com/nao1215/gup).                                                                 |
 | `dotnet`    | Update all global dotnet packages.                                                                                                 |
 | `fish`      | Update all fish plugins.                                                                                                           |
