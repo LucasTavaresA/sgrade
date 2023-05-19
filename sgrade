@@ -316,7 +316,7 @@ update_cargo() {
 update_flatpak() {
     if has flatpak; then
         heading FLATPAK
-        exec_status flatpak update
+        exec_status "$SU" flatpak update
     fi
 }
 
